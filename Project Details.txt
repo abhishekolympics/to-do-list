@@ -1,0 +1,9 @@
+Requirements
+
+1. Authentication -- user login, signup
+
+2. To-do list -- add note, read note ,delete note, update note
+
+3. Note -- title, description, due date, priority level, completion status, tags, categories 
+
+4. Add features like drag & drop for reordering tasks and responsive design for phone
