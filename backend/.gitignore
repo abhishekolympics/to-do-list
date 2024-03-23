@@ -1,0 +1,42 @@
+# Dependency directories
+node_modules/
+
+# Environment variables file
+.env
+
+# macOS directories
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# OS generated files
+.idea/
+.vscode/
+
+# Dependency lock files
+package-lock.json
+yarn.lock
+
+# Environment-specific files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor-specific files
+*.sublime-project
+*.sublime-workspace
+*.idea/workspace.xml
+*.iml
+.idea_modules/
+
+# Ignore coverage directory for testing
+coverage/
+
+# Ignore dist directory for build output
+dist/
+
+# Ignore node_modules in subdirectories
+**/node_modules/
