@@ -1,8 +1,10 @@
 const express = require('express');
 const { register, login } = require('../controllers/authController');
-const authMiddleware = require('../middleware/authMiddleware');
+
 
 const router = express.Router();
+
+
 
 // @route   POST /api/auth/register
 // @desc    Register a new user
@@ -21,5 +23,7 @@ router.post('/login', login);
 // router.get('/user', authMiddleware, (req, res) => {
 //   res.json(req.user);
 // });
+
+router.get
 
 module.exports = router;
