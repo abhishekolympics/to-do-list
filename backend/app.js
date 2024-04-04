@@ -8,8 +8,8 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const app = express();
 
 passport.use(new GoogleStrategy({
-  clientID: '31010736820-uk9hc3go21lau3bkb183m4jak8hsomon.apps.googleusercontent.com',
-  clientSecret: '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',
+  clientID: process.env.clientID,
+  clientSecret: process.env.clientSecret,
   callbackURL: 'http://localhost:3000/'
 }, (accessToken, refreshToken, profile, done) => {
   console.log(profile);
