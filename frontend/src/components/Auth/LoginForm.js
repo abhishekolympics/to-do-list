@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 // import {FontAwesomeIcon} from "@fortawesome/fontawesome";
+import TaskList from "../TaskList";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 function App() {
@@ -21,7 +22,7 @@ function App() {
     password: ''
   });
 
-  console.log("after coming from register button from home page, isSignUpActive=",isSignUpActive);
+  // console.log("after coming from register button from home page, isSignUpActive=",isSignUpActive);
   
   const { email: loginEmail, password: loginPassword } = loginFormData;
   const { username, email: signupEmail, password: signupPassword } = signupFormData;
@@ -92,6 +93,27 @@ function App() {
     window.history.pushState({}, null, '/login');
   };
 
+  function handleGoogleSignUp() {
+    const manoj=document.getElementById("abhisheeke");
+    manoj.innerHTML="response aa gya, but print nhi hua";
+    console.log("inside the handle Google SignUp function");
+      fetch('http://localhost:5000/api/auth/google')
+          .then(response => {
+            console.log("response=",response);
+              if (!response.ok) {
+                  throw new Error('Network response was not ok');
+              }
+              return response.json();
+              
+          })
+          .then(data => {
+              console.log(data); // Do something with the response data
+          })
+          .catch(error => {
+              console.error('There was a problem with the fetch operation:', error);
+          });
+  }
+
   return (
     <div className={`container ${isSignUpActive ? "right-panel-active" : ""}`}>
       <ToastContainer/>
@@ -102,7 +124,7 @@ function App() {
             <a target="_blank" href="http://www.facebook.com" className="social">
             <img width="45" height="45" src="https://img.icons8.com/plasticine/100/facebook-new.png" alt="facebook-new"/>
             </a>
-            <a target="_blank" href="http://localhost:5000/api/auth/google" className="social">
+            <a onClick={handleGoogleSignUp} target="_blank" href="http://localhost:5000/api/auth/google" className="social">
             <img width="45" height="45" src="https://img.icons8.com/plasticine/100/google-logo.png" alt="google-logo"/>
             </a>
             <a target="_blank" href="http://www.linkedin.com" className="social">

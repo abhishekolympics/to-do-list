@@ -12,8 +12,6 @@ const HomePage = () => {
           <p>You can click the buttons below to navigate:</p>
            <Link to="/login"><button>Login</button></Link>
           <Link to="/register"><button>Register</button></Link>
-          <i class="fa-brands fa-facebook"></i>
-          {/* <FontAwesomeIcon icon="fa-solid fa-star" />  */}
         </div> 
     </div>
   );
