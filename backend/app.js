@@ -10,27 +10,56 @@ const app = express();
 passport.use(new GoogleStrategy({
   clientID: process.env.clientID,
   clientSecret: process.env.clientSecret,
-  callbackURL: 'http://localhost:3000/'
+  callbackURL: 'http://localhost:3000/tasks'
 }, (accessToken, refreshToken, profile, done) => {
-  console.log(profile);
-  res.json({ token });
 
-  // Use profile information to create or authenticate user
-  // For example:
-  // User.findOrCreate({ googleId: profile.id }, function (err, user) {
-  //   return done(err, user);
-  // });
+  const userEmail = profile.emails[0].value;
+    
+    // Use the userEmail variable as needed, e.g., send it to the server or display it in the UI
+    console.log('User Email:', userEmail);
+  console.log('Google profile:');
+  console.log('Name:', profile.displayName);
+  console.log('Email:', profile.emails[0].value);
+
+  // Generate a random password for the user
+  const randomPassword = Math.random().toString(36).slice(-8);
+  console.log('Random Password:', randomPassword);
+
+  // Call done with the profile to proceed with authentication
+  done(null, profile);
 }));
 
 app.get('/auth/google',
 passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 app.get('/auth/google/callback',
-passport.authenticate('google', { failureRedirect: '/login' }),
-(req, res) => {
-  // Successful authentication, redirect home.
-  res.redirect('/');
-});
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  async (req, res) => {
+    try {
+      // Extract user information from the Google profile
+      const { id, displayName, emails } = req.user;
+
+      // Generate a random password for the user
+      const randomPassword = Math.random().toString(36).slice(-8);
+
+      // Create a new user document in MongoDB
+      const newUser = new User({
+        username: displayName,
+        email: emails[0].value,
+        password: randomPassword // You might want to hash this password before saving
+      });
+
+      // Save the new user document to the database
+      await newUser.save();
+
+      // Redirect the user to the desired location
+      res.redirect('/');
+    } catch (error) {
+      console.error('Error storing user data:', error);
+      res.status(500).send('Server Error');
+    }
+  });
+
 
 // Backend route for initiating Google OAuth authentication
 // app.get('/api/auth/google', (req, res) => {
