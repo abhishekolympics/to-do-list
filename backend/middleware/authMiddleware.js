@@ -3,7 +3,12 @@ const config = require('../config/index');
 
 const authMiddleware = (req, res, next) => {
   // Get token from header
-  const token = req.header('x-auth-token');
+  const authHeader = req.header('Authorization');
+  // console.log("request from frontend  == ",req.header);
+  console.log("authorization=",authHeader);
+  const token = authHeader && authHeader.split(' ')[1];
+
+  console.log("Token from frontend side =", token);
 
   // Check if token doesn't exist
   if (!token) {
