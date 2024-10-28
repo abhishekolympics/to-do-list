@@ -4,16 +4,17 @@
     box-sizing: border-box;
 }
 
-body {
+
+.mainContainer {
     font-family: 'Montserrat', sans-serif;
-    background: #f6f5f7;
+    background: rgb(46, 45, 45);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: -20px 0 50px;
-		margin-top: 20px;
+    margin: auto;
+	/* margin-top: 20px; */
 }
 
 h1 {
@@ -67,6 +68,7 @@ a {
 }
 
 .social-container a {
+    cursor:pointer;
     /* border: 1px solid #ddd; */
     /* border-radius: 50%; */
     display: inline-flex;

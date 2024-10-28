@@ -5,8 +5,8 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import TaskList from "./components/TaskList";
-import AddTaskForm from "./components/AddTaskForm";
-import EditTaskForm from "./components/EditTaskForm";
+// import AddTaskForm from "./components/AddTaskForm";
+// import EditTaskForm from "./components/EditTaskForm";
 import LoginForm from "./components/Auth/LoginForm"; // Import LoginForm component
 
 function App() {
@@ -24,8 +24,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/tasks" element={<TaskList />} />
-          <Route path="/add-task" element={<AddTaskForm />} />
-          <Route path="/edit-task/:id" element={<EditTaskForm />} />
+          {/* <Route path="/add-task" element={<AddTaskForm />} /> */}
+          {/* <Route path="/edit-task/:id" element={<EditTaskForm />} /> */}
         </Routes>
         {/* Render the LoginForm component only on the /register route */}
         {isRegisterPage && <LoginForm />}
