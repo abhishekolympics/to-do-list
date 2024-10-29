@@ -129,6 +129,7 @@ app.get(
   }
 );
 app.get("/api/auth/token", (req, res) => {
+  console.log("inside /api/auth/token, req.session=",req.session);
   if (req.session.token) {
     return res.status(200).json({ token: req.session.token });
   }
