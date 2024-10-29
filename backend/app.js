@@ -43,7 +43,7 @@ passport.use(
     {
       clientID: process.env.clientID,
       clientSecret: process.env.clientSecret,
-      callbackURL: "/auth/google/callback",
+      callbackURL: "https://to-do-list-0kqb.onrender.com/auth/google/callback",
       scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
