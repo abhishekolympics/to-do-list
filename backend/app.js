@@ -7,8 +7,6 @@ const OAuth2Strategy = require("passport-google-oauth2").Strategy;
 const User = require("./models/User");
 const session = require("express-session");
 const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
-const MongoStore = require('connect-mongo');
 
 // Connect to MongoDB
 connectDB();
@@ -16,32 +14,24 @@ connectDB();
 // Create Express app
 const app = express();
 
-// Enable cross-origin resource sharing
+//Enable cross origin Resource Sharing
 app.use(
   cors({
-    origin: "http://localhost:3000", // Change to your frontend URL in production
+    origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true, // Allow credentials to be included
+    credentials: true,
   })
 );
 app.use(express.json());
-app.use(cookieParser());
 
-// Setup session with secure options
-app.use(session({
-  secret: 'yourSecret',
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
-  cookie: { httpOnly: true, secure: true, sameSite: 'lax' },
-}));
-
-
-// Middleware to log session state
-app.use((req, res, next) => {
-  console.log('Session before middleware:', req.session);
-  next();
-});
+// Setup session
+app.use(
+  session({
+    secret: process.env.JWT_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
 // Setup Passport
 app.use(passport.initialize());
@@ -62,14 +52,11 @@ passport.use(
         let user = await User.findOne({ email: profile.emails[0].value });
         if (!user) {
           user = new User({
-            username: profile.displayName,
-            email: profile.emails[0].value,
-            password: "Abhishek", // Consider using hashed passwords
+            username: profile?.displayName,
+            email: profile?.emails[0].value,
+            password: "Abhishek",
           });
           await user.save();
-          console.log("New user created:", user);
-        } else {
-          console.log("User already exists:", user);
         }
         return done(null, user);
       } catch (error) {
@@ -79,20 +66,13 @@ passport.use(
   )
 );
 
-// Serialize and deserialize user for session management
+//Serialize and deserialize user for session management
 passport.serializeUser((user, done) => {
-  done(null, user.id); // or `user._id` based on your schema
+  done(null, user);
 });
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
+passport.deserializeUser(async (user, done) => {
+  done(null, user);
 });
-
 
 app.get(
   "/auth/google",
@@ -105,62 +85,48 @@ app.get(
     failureRedirect: "http://localhost:3000/login",
   }),
   async (req, res) => {
-    console.log('Session after authentication:', req.session); // Log session
     if (!req.user) {
-      console.error("No user found after Google callback");
       return res.status(401).json({ message: "Authentication failed" });
     }
 
     // Generate JWT token using the user's ID
     const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
       expiresIn: "3600s",
-    });
+    }); // Expires in 1 hour
+    console.log("User ID in callback:", req.user._id);
 
     // Set token as a secure, HTTP-only cookie
-    // res.cookie("token", token, {
-    //   httpOnly: true, // Cookie cannot be accessed via JavaScript
-    //   secure: process.env.NODE_ENV === "production", // Only send cookie over HTTPS in production
-    //   maxAge: 3600 * 1000, // 1 hour in milliseconds
-    // });
-    req.session.token = token;
+    res.cookie("token", token, {
+      httpOnly: true, // Cookie cannot be accessed via JavaScript, preventing XSS
+      secure: process.env.NODE_ENV === "production", // Ensure the cookie is only sent over HTTPS in production
+      maxAge: 3600 * 1000, // 1 hour in milliseconds
+    });
 
-    // Redirect to tasks page
+    // Redirect to the tasks page without showing the token in the URL
     res.redirect("http://localhost:3000/tasks");
   }
 );
-app.get("/api/auth/token", (req, res) => {
-  console.log("inside /api/auth/token, req.session=",req.session);
-  if (req.session.token) {
-    return res.status(200).json({ token: req.session.token });
-  }
-  return res.status(401).json({ message: "Not authorized" });
-});
 
 app.get("/login/success", async (req, res) => {
-  console.log('Request received at /login/success');
-  console.log('Session:', req.session);
-  console.log("Passport user in session:=", req.session.passport);
-  console.log('User:', req.user); // This should show user details if available
-
-  if (!req.user) {
-    return res.status(401).json({ message: "Not Authorized" });
-  }
-
-  // Generate JWT token using the user's ID
+  console.log("request inside /login/success =", req.body);
   const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
     expiresIn: "3600s",
-  });
-
-  res.status(200).json({ message: "User logged in", user: req.user, token });
+  }); // Expires in 1 hour
+  console.log("Token is generated in /login/success =", token);
+  if (req.user) {
+    res
+      .status(200)
+      .json({ message: "user Login", user: req.user, token: token });
+  } else {
+    res.status(400).json({ message: "Not Authorised" });
+  }
 });
 
-
-app.get("/logout", (req, res, next) => {
+app.get("/logout", async (req, res, next) => {
   req.logout(function (err) {
     if (err) {
       return next(err);
     }
-    res.clearCookie("token"); // Clear JWT cookie on logout
     res.redirect("http://localhost:3000/login");
   });
 });
