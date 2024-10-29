@@ -33,10 +33,10 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
-      httpOnly: true, // Prevent JavaScript access to cookies
-      sameSite: "lax", // Set cookie sharing policy
-      maxAge: 3600 * 1000, // 1 hour in milliseconds
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 3600 * 1000, // 1 hour
     },
   })
 );
@@ -56,12 +56,11 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        // Check if the user already exists in the database
         let user = await User.findOne({ email: profile.emails[0].value });
         if (!user) {
           user = new User({
-            username: profile?.displayName,
-            email: profile?.emails[0].value,
+            username: profile.displayName,
+            email: profile.emails[0].value,
             password: "Abhishek",
           });
           await user.save();
@@ -76,12 +75,19 @@ passport.use(
 
 // Serialize and deserialize user for session management
 passport.serializeUser((user, done) => {
-  done(null, user);
-});
-passport.deserializeUser((user, done) => {
-  done(null, user);
+  done(null, user._id);
 });
 
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
+
+// Google OAuth routes
 app.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
@@ -104,33 +110,29 @@ app.get(
 
     // Set token as a secure, HTTP-only cookie
     res.cookie("token", token, {
-      httpOnly: true, // Cookie cannot be accessed via JavaScript
-      secure: process.env.NODE_ENV === "production", // Only send cookie over HTTPS in production
-      maxAge: 3600 * 1000, // 1 hour in milliseconds
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 3600 * 1000, // 1 hour
     });
 
-    // Redirect to tasks page
+    // Redirect to frontend tasks page without the token in the URL
     res.redirect("http://localhost:3000/tasks");
   }
 );
 
+// Login success route
 app.get("/login/success", async (req, res) => {
-  if (!req.user) {
+  if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Not Authorized" });
   }
 
-  const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
-    expiresIn: "3600s",
-  });
-
-  res.status(200).json({ message: "User logged in", user: req.user, token });
+  res.status(200).json({ message: "User logged in", user: req.user });
 });
 
+// Logout route
 app.get("/logout", (req, res, next) => {
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
-    }
+  req.logout((err) => {
+    if (err) return next(err);
     res.clearCookie("token"); // Clear JWT cookie on logout
     res.redirect("http://localhost:3000/login");
   });
