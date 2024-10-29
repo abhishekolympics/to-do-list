@@ -127,15 +127,21 @@ app.get(
 
 app.get("/login/success", async (req, res) => {
   console.log('Request received at /login/success');
-  console.log('Request user:', req.user);
+  console.log('Session:', req.session);
+  console.log('User:', req.user); // This should show user details if available
+
   if (!req.user) {
-    console.error("User not found, returning 401");
     return res.status(401).json({ message: "Not Authorized" });
   }
 
-  // No need to generate and send a token since it's already set as an HTTP-only cookie
-  res.status(200).json({ message: "User logged in", user: req.user });
+  // Generate JWT token using the user's ID
+  const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
+    expiresIn: "3600s",
+  });
+
+  res.status(200).json({ message: "User logged in", user: req.user, token });
 });
+
 
 app.get("/logout", (req, res, next) => {
   req.logout(function (err) {
