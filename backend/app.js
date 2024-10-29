@@ -8,6 +8,7 @@ const User = require("./models/User");
 const session = require("express-session");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const MongoStore = require('connect-mongo');
 
 // Connect to MongoDB
 connectDB();
@@ -27,19 +28,14 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Setup session with secure options
-app.use(
-  session({
-    secret: process.env.JWT_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-      secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
-      httpOnly: true, // Prevent JavaScript access to cookies
-      sameSite: "lax", // Set cookie sharing policy
-      maxAge: 3600 * 1000, // 1 hour in milliseconds
-    },
-  })
-);
+app.use(session({
+  secret: 'yourSecret',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+  cookie: { httpOnly: true, secure: true, sameSite: 'lax' },
+}));
+
 
 // Middleware to log session state
 app.use((req, res, next) => {
@@ -85,11 +81,18 @@ passport.use(
 
 // Serialize and deserialize user for session management
 passport.serializeUser((user, done) => {
-  done(null, user);
+  done(null, user.id); // or `user._id` based on your schema
 });
-passport.deserializeUser((user, done) => {
-  done(null, user);
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
 });
+
 
 app.get(
   "/auth/google",
