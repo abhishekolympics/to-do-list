@@ -7,6 +7,7 @@ const OAuth2Strategy = require("passport-google-oauth2").Strategy;
 const User = require("./models/User");
 const session = require("express-session");
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
 // Connect to MongoDB
 connectDB();
@@ -14,7 +15,7 @@ connectDB();
 // Create Express app
 const app = express();
 
-//Enable cross origin Resource Sharing
+// Enable cross-origin resource sharing
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -23,13 +24,20 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 
-// Setup session
+// Setup session with secure options
 app.use(
   session({
     secret: process.env.JWT_SECRET,
     resave: false,
     saveUninitialized: true,
+    cookie: {
+      secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+      httpOnly: true, // Prevent JavaScript access to cookies
+      sameSite: "lax", // Set cookie sharing policy
+      maxAge: 3600 * 1000, // 1 hour in milliseconds
+    },
   })
 );
 
@@ -66,11 +74,11 @@ passport.use(
   )
 );
 
-//Serialize and deserialize user for session management
+// Serialize and deserialize user for session management
 passport.serializeUser((user, done) => {
   done(null, user);
 });
-passport.deserializeUser(async (user, done) => {
+passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
@@ -92,41 +100,38 @@ app.get(
     // Generate JWT token using the user's ID
     const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
       expiresIn: "3600s",
-    }); // Expires in 1 hour
-    console.log("User ID in callback:", req.user._id);
+    });
 
     // Set token as a secure, HTTP-only cookie
     res.cookie("token", token, {
-      httpOnly: true, // Cookie cannot be accessed via JavaScript, preventing XSS
-      secure: process.env.NODE_ENV === "production", // Ensure the cookie is only sent over HTTPS in production
+      httpOnly: true, // Cookie cannot be accessed via JavaScript
+      secure: process.env.NODE_ENV === "production", // Only send cookie over HTTPS in production
       maxAge: 3600 * 1000, // 1 hour in milliseconds
     });
 
-    // Redirect to the tasks page without showing the token in the URL
+    // Redirect to tasks page
     res.redirect("http://localhost:3000/tasks");
   }
 );
 
 app.get("/login/success", async (req, res) => {
-  console.log("request inside /login/success =", req.body);
+  if (!req.user) {
+    return res.status(401).json({ message: "Not Authorized" });
+  }
+
   const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
     expiresIn: "3600s",
-  }); // Expires in 1 hour
-  console.log("Token is generated in /login/success =", token);
-  if (req.user) {
-    res
-      .status(200)
-      .json({ message: "user Login", user: req.user, token: token });
-  } else {
-    res.status(400).json({ message: "Not Authorised" });
-  }
+  });
+
+  res.status(200).json({ message: "User logged in", user: req.user, token });
 });
 
-app.get("/logout", async (req, res, next) => {
+app.get("/logout", (req, res, next) => {
   req.logout(function (err) {
     if (err) {
       return next(err);
     }
+    res.clearCookie("token"); // Clear JWT cookie on logout
     res.redirect("http://localhost:3000/login");
   });
 });
