@@ -18,9 +18,9 @@ const app = express();
 // Enable cross-origin resource sharing
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://localhost:3000", // Change to your frontend URL in production
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
+    credentials: true, // Allow credentials to be included
   })
 );
 app.use(express.json());
@@ -33,13 +33,19 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 3600 * 1000,
+      secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+      httpOnly: true, // Prevent JavaScript access to cookies
+      sameSite: "lax", // Set cookie sharing policy
+      maxAge: 3600 * 1000, // 1 hour in milliseconds
     },
   })
 );
+
+// Middleware to log session state
+app.use((req, res, next) => {
+  console.log('Session before middleware:', req.session);
+  next();
+});
 
 // Setup Passport
 app.use(passport.initialize());
@@ -57,13 +63,12 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         // Check if the user already exists in the database
-        console.log("Profile received from Google:", profile);
         let user = await User.findOne({ email: profile.emails[0].value });
         if (!user) {
           user = new User({
             username: profile.displayName,
             email: profile.emails[0].value,
-            password: "Abhishek", // Use hashed password in production
+            password: "Abhishek", // Consider using hashed passwords
           });
           await user.save();
           console.log("New user created:", user);
@@ -72,7 +77,6 @@ passport.use(
         }
         return done(null, user);
       } catch (error) {
-        console.error("Error during authentication:", error);
         return done(error, null);
       }
     }
@@ -98,41 +102,39 @@ app.get(
     failureRedirect: "http://localhost:3000/login",
   }),
   async (req, res) => {
+    console.log('Session after authentication:', req.session); // Log session
     if (!req.user) {
       console.error("No user found after Google callback");
       return res.status(401).json({ message: "Authentication failed" });
     }
 
+    // Generate JWT token using the user's ID
     const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
       expiresIn: "3600s",
     });
-    console.log("User ID in callback:", req.user._id);
 
+    // Set token as a secure, HTTP-only cookie
     res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 3600 * 1000,
+      httpOnly: true, // Cookie cannot be accessed via JavaScript
+      secure: process.env.NODE_ENV === "production", // Only send cookie over HTTPS in production
+      maxAge: 3600 * 1000, // 1 hour in milliseconds
     });
 
+    // Redirect to tasks page
     res.redirect("http://localhost:3000/tasks");
   }
 );
 
 app.get("/login/success", async (req, res) => {
-  console.log("Request received at /login/success");
-  console.log("Request user:", req.user);
-
+  console.log('Request received at /login/success');
+  console.log('Request user:', req.user);
   if (!req.user) {
-    console.warn("User not found, returning 401");
+    console.error("User not found, returning 401");
     return res.status(401).json({ message: "Not Authorized" });
   }
 
-  const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
-    expiresIn: "3600s",
-  });
-
-  console.log("Token generated in /login/success:", token);
-  res.status(200).json({ message: "User logged in", user: req.user, token });
+  // No need to generate and send a token since it's already set as an HTTP-only cookie
+  res.status(200).json({ message: "User logged in", user: req.user });
 });
 
 app.get("/logout", (req, res, next) => {
@@ -140,7 +142,7 @@ app.get("/logout", (req, res, next) => {
     if (err) {
       return next(err);
     }
-    res.clearCookie("token");
+    res.clearCookie("token"); // Clear JWT cookie on logout
     res.redirect("http://localhost:3000/login");
   });
 });
