@@ -36,7 +36,7 @@ app.use(
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       sameSite: "lax",
-      maxAge: 3600 * 1000, // 1 hour
+      maxAge: 3600 * 1000,
     },
   })
 );
@@ -56,17 +56,23 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+        // Check if the user already exists in the database
+        console.log("Profile received from Google:", profile);
         let user = await User.findOne({ email: profile.emails[0].value });
         if (!user) {
           user = new User({
             username: profile.displayName,
             email: profile.emails[0].value,
-            password: "Abhishek",
+            password: "Abhishek", // Use hashed password in production
           });
           await user.save();
+          console.log("New user created:", user);
+        } else {
+          console.log("User already exists:", user);
         }
         return done(null, user);
       } catch (error) {
+        console.error("Error during authentication:", error);
         return done(error, null);
       }
     }
@@ -75,19 +81,12 @@ passport.use(
 
 // Serialize and deserialize user for session management
 passport.serializeUser((user, done) => {
-  done(null, user._id);
+  done(null, user);
+});
+passport.deserializeUser((user, done) => {
+  done(null, user);
 });
 
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
-});
-
-// Google OAuth routes
 app.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
@@ -100,40 +99,48 @@ app.get(
   }),
   async (req, res) => {
     if (!req.user) {
+      console.error("No user found after Google callback");
       return res.status(401).json({ message: "Authentication failed" });
     }
 
-    // Generate JWT token using the user's ID
     const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
       expiresIn: "3600s",
     });
+    console.log("User ID in callback:", req.user._id);
 
-    // Set token as a secure, HTTP-only cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 3600 * 1000, // 1 hour
+      maxAge: 3600 * 1000,
     });
 
-    // Redirect to frontend tasks page without the token in the URL
     res.redirect("http://localhost:3000/tasks");
   }
 );
 
-// Login success route
 app.get("/login/success", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  console.log("Request received at /login/success");
+  console.log("Request user:", req.user);
+
+  if (!req.user) {
+    console.warn("User not found, returning 401");
     return res.status(401).json({ message: "Not Authorized" });
   }
 
-  res.status(200).json({ message: "User logged in", user: req.user });
+  const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
+    expiresIn: "3600s",
+  });
+
+  console.log("Token generated in /login/success:", token);
+  res.status(200).json({ message: "User logged in", user: req.user, token });
 });
 
-// Logout route
 app.get("/logout", (req, res, next) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    res.clearCookie("token"); // Clear JWT cookie on logout
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.clearCookie("token");
     res.redirect("http://localhost:3000/login");
   });
 });
