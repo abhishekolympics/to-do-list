@@ -128,6 +128,7 @@ app.get(
 app.get("/login/success", async (req, res) => {
   console.log('Request received at /login/success');
   console.log('Session:', req.session);
+  console.log("Passport user in session:=", req.session.passport);
   console.log('User:', req.user); // This should show user details if available
 
   if (!req.user) {
