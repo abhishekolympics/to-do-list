@@ -122,11 +122,18 @@ app.get(
     //   secure: process.env.NODE_ENV === "production", // Only send cookie over HTTPS in production
     //   maxAge: 3600 * 1000, // 1 hour in milliseconds
     // });
+    req.session.token = token;
 
     // Redirect to tasks page
-    res.redirect(`http://localhost:3000/tasks#token=${token}`);
+    res.redirect("http://localhost:3000/tasks");
   }
 );
+app.get("/api/auth/token", (req, res) => {
+  if (req.session.token) {
+    return res.status(200).json({ token: req.session.token });
+  }
+  return res.status(401).json({ message: "Not authorized" });
+});
 
 app.get("/login/success", async (req, res) => {
   console.log('Request received at /login/success');
