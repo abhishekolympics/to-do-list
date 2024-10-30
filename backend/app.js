@@ -6,7 +6,8 @@ const passport = require("passport");
 const OAuth2Strategy = require("passport-google-oauth2").Strategy;
 const User = require("./models/User");
 const session = require("express-session");
-const jwt = require("jsonwebtoken");
+const Session = require("./models/Session");
+const authenticateSession = require("./middleware/authenticateSession");
 
 // Connect to MongoDB
 connectDB();
@@ -89,17 +90,26 @@ app.get(
       return res.status(401).json({ message: "Authentication failed" });
     }
 
-    // Generate JWT token using the user's ID
-    const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
-      expiresIn: "3600s",
-    }); // Expires in 1 hour
-    console.log("User ID in callback:", req.user._id);
+    // Generate session ID
+    const sessionId = generateSessionId();
 
-    // Set token as a secure, HTTP-only cookie
-    res.cookie("token", token, {
-      httpOnly: true, // Cookie cannot be accessed via JavaScript, preventing XSS
-      secure: process.env.NODE_ENV === "production", // Ensure the cookie is only sent over HTTPS in production
-      maxAge: 3600 * 1000, // 1 hour in milliseconds
+    // Capture user-agent and IP address
+    const userAgent = req.get("User-Agent");
+    const ipAddress = req.ip;
+
+    // Save session with user ID, user-agent, and IP address
+    await Session.create({
+      sessionId,
+      userId: req.user._id,
+      userAgent,
+      ipAddress,
+    });
+
+    // Set session ID as an HTTP-only cookie
+    res.cookie("sessionId", sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 3600 * 1000, // 1 hour
     });
 
     // Redirect to the tasks page without showing the token in the URL
@@ -107,22 +117,18 @@ app.get(
   }
 );
 
-app.get("/login/success", async (req, res) => {
-  console.log("request inside /login/success =", req.body);
-  const token = jwt.sign({ user: req.user._id }, process.env.JWT_SECRET, {
-    expiresIn: "3600s",
-  }); // Expires in 1 hour
-  console.log("Token is generated in /login/success =", token);
-  if (req.user) {
-    res
-      .status(200)
-      .json({ message: "user Login", user: req.user, token: token });
-  } else {
-    res.status(400).json({ message: "Not Authorised" });
-  }
+app.get("/login/success", authenticateSession, async (req, res) => {
+  res
+    .status(200)
+    .json({ message: "User logged in successfully", user: req.user });
 });
 
 app.get("/logout", async (req, res, next) => {
+  const sessionId = req.cookies.sessionId;
+
+  // Remove the session from the database on logout
+  await Session.findOneAndDelete({ sessionId });
+  
   req.logout(function (err) {
     if (err) {
       return next(err);
