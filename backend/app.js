@@ -8,6 +8,7 @@ const User = require("./models/User");
 const session = require("express-session");
 const Session = require("./models/Session");
 const authenticateSession = require("./middleware/authenticateSession");
+const generateSessionId = require('./utils/sessionUtils');
 
 // Connect to MongoDB
 connectDB();
