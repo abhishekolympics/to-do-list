@@ -112,6 +112,7 @@ app.get(
     res.cookie("sessionId", sessionId, {
       httpOnly: true,
       // secure: process.env.NODE_ENV === "production",
+      domain: undefined,
       maxAge: 3600 * 1000, // 1 hour
     });
 
