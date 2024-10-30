@@ -10,6 +10,7 @@ const Session = require("./models/Session");
 const authenticateSession = require("./middleware/authenticateSession");
 const generateSessionId = require('./utils/sessionUtils');
 const cookieParser = require("cookie-parser");
+const MongoStore = require('connect-mongo');
 
 // Connect to MongoDB
 connectDB();
