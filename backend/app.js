@@ -33,9 +33,17 @@ app.use(
   session({
     secret: process.env.JWT_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+    cookie: {
+      httpOnly: true,
+      secure: true, // Required for cross-site cookies in production
+      sameSite: "none", // Ensures cookies are sent across different origins
+      maxAge: 3600000, // 1 hour
+    },
   })
 );
+
 
 // Setup Passport
 app.use(passport.initialize());
@@ -47,7 +55,7 @@ passport.use(
     {
       clientID: process.env.clientID,
       clientSecret: process.env.clientSecret,
-      callbackURL: "https://to-do-list-0kqb.onrender.com/auth/google/callback",
+      callbackURL: "https://to-do-list-production-8145.up.railway.app/auth/google/callback",
       scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -115,6 +123,8 @@ app.get(
       domain: undefined,
       maxAge: 3600 * 1000, // 1 hour
     });
+
+    console.log("session id inside google auth=",sessionId);
 
     // Redirect to the tasks page without showing the token in the URL
     res.redirect("http://localhost:3000/tasks");
