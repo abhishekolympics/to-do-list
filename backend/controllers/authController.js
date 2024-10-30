@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const config = require("../config/index");
 const Session = require("../models/Session");
+const generateSessionId = require('../utils/sessionUtils')
 
 // Register a new user
 const register = async (req, res) => {
