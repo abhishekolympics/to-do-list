@@ -1,6 +1,9 @@
 const Session = require("../models/Session");
 
 const authenticateSession = async (req, res, next) => {
+
+  console.log("cookies inside authenticate=",req.cookies);
+
   try {
     const sessionId = req.cookies.sessionId;
     if (!sessionId) {
