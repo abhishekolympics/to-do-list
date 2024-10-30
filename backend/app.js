@@ -9,6 +9,7 @@ const session = require("express-session");
 const Session = require("./models/Session");
 const authenticateSession = require("./middleware/authenticateSession");
 const generateSessionId = require('./utils/sessionUtils');
+const cookieParser = require("cookie-parser");
 
 // Connect to MongoDB
 connectDB();
@@ -25,6 +26,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 
 // Setup session
 app.use(
