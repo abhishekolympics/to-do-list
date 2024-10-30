@@ -24,7 +24,7 @@ const authenticateSession = async (req, res, next) => {
 
     // Optionally, check if user agent matches
     if (session.userAgent !== req.headers["user-agent"]) {
-      return res.status(403).json({ msg: "Session User Agent mismatch. Unauthorized access." });
+      return res.status(403).json({ msg: "Session User Agent mismatch. Unauthorized access." , sessionId:sessionId });
     }
 
     // Attach user data to request for further processing
