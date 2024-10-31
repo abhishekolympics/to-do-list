@@ -120,7 +120,7 @@ app.get(
 
     // Set session ID as an HTTP-only cookie
     res.cookie("sessionId", sessionId, {
-      httpOnly: true,
+      httpOnly: false,
       // secure: process.env.NODE_ENV === "production",
       domain: undefined,
       maxAge: 3600 * 1000, // 1 hour
