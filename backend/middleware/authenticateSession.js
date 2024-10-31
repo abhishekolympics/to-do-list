@@ -1,6 +1,6 @@
 const Session = require("../models/Session");
 const IpAddress = require("../models/IpAddress");
-const ip = require("ip");
+const ip = require('ip');
 
 // Function to check if two IPs are in the same subnet
 const isSameSubnet = (ip1, ip2, subnetMask = "255.255.255.0") => {

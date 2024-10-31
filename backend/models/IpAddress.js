@@ -16,4 +16,6 @@ const ipAddressSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("IpAddress", ipAddressSchema);
+ const IpAddress = new mongoose.model("IpAddress", ipAddressSchema);
+
+ module.exports = IpAddress;
