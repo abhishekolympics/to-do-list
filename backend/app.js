@@ -27,7 +27,7 @@ app.use(function (req, res, next) {
     "Access-Control-Allow-Methods",
     "POST, PUT, OPTIONS, DELETE, GET"
   );
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
@@ -39,7 +39,7 @@ app.use(function (req, res, next) {
 //Enable cross origin Resource Sharing
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
