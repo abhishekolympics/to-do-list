@@ -31,6 +31,12 @@ app.use(cookieParser());
 
 //Enable cross origin Resource Sharing
 
+app.use(session({
+  secret: 'abhishek', // Replace with a strong secret key
+  resave: false,
+  saveUninitialized: false
+}));
+
 // Setup session
 // app.use(
 //   session({
