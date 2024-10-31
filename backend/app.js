@@ -8,9 +8,9 @@ const User = require("./models/User");
 const session = require("express-session");
 const Session = require("./models/Session");
 const authenticateSession = require("./middleware/authenticateSession");
-const generateSessionId = require('./utils/sessionUtils');
+const generateSessionId = require("./utils/sessionUtils");
 const cookieParser = require("cookie-parser");
-const MongoStore = require('connect-mongo');
+const MongoStore = require("connect-mongo");
 
 // Connect to MongoDB
 connectDB();
@@ -18,34 +18,48 @@ connectDB();
 // Create Express app
 const app = express();
 
-//Enable cross origin Resource Sharing
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(function (req, res, next) {
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "POST, PUT, OPTIONS, DELETE, GET"
+  );
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  res.header("Access-Control-Allow-Credentials", true);
+  next();
+});
+
+//Enable cross origin Resource Sharing
+// app.use(
+//   cors({
+//     origin: "http://localhost:3000",
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     credentials: true,
+//   })
+// );
 
 // Setup session
 app.use(
   session({
-    secret: 'yourSecret',
+    secret: "yourSecret",
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
-    cookie: {
-      domain: '.railway.app', // Explicitly set for Railway
-      httpOnly: true,        // Adjust if you need access in frontend JS
-      secure: true,          // Ensure secure only
-      sameSite: 'none',      // Required for cross-origin cookies
-    },
+    // store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+    // cookie: {
+    //   domain: '.railway.app', // Explicitly set for Railway
+    //   httpOnly: true,        // Adjust if you need access in frontend JS
+    //   secure: true,          // Ensure secure only
+    //   sameSite: 'none',      // Required for cross-origin cookies
+    // },
   })
 );
-
-
 
 // Setup Passport
 app.use(passport.initialize());
@@ -57,7 +71,8 @@ passport.use(
     {
       clientID: process.env.clientID,
       clientSecret: process.env.clientSecret,
-      callbackURL: "https://to-do-list-production-8145.up.railway.app/auth/google/callback",
+      callbackURL:
+        "https://to-do-list-production-8145.up.railway.app/auth/google/callback",
       scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -126,7 +141,7 @@ app.get(
       maxAge: 3600 * 1000, // 1 hour
     });
 
-    console.log("session id inside google auth=",sessionId);
+    console.log("session id inside google auth=", sessionId);
 
     // Redirect to the tasks page without showing the token in the URL
     res.redirect("http://localhost:3000/tasks");
@@ -144,7 +159,7 @@ app.get("/logout", async (req, res, next) => {
 
   // Remove the session from the database on logout
   await Session.findOneAndDelete({ sessionId });
-  
+
   req.logout(function (err) {
     if (err) {
       return next(err);
