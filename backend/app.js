@@ -18,16 +18,10 @@ connectDB();
 // Create Express app
 const app = express();
 
-const origins = [
-  "http://localhost:3000",
-  "https://to-do-list-frontend-woex.onrender.com/",
-  "https://alluring-radiance-production.up.railway.app/",
-];
-
 // app.use(cors());
 app.use(
   cors({
-    origin: origins,
+    origin: 'https://alluring-radiance-production.up.railway.app/',
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -105,34 +99,13 @@ app.get(
 
 app.get(
   "/auth/google/callback",
-  (req, res, next) => {
-    // Determine failure redirect URL based on request origin
-    console.log("request headers inside google oauth=",req.headers);
-    const origin = req.headers.origin;
-    const failureRedirectUrl =
-      origin === "http://localhost:3000"
-        ? "http://localhost:3000/login"
-        : origin === "https://to-do-list-frontend-woex.onrender.com"
-        ? "https://to-do-list-frontend-woex.onrender.com/login"
-        : "https://alluring-radiance-production.up.railway.app/login";
-
-    // Call passport.authenticate with the dynamic failure redirect
-    passport.authenticate("google", {
-      failureRedirect: failureRedirectUrl,
-    })(req, res, next);
-  },
+  passport.authenticate("google", {
+    failureRedirect: "https://alluring-radiance-production.up.railway.app/login",
+  }),
   async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ message: "Authentication failed" });
     }
-
-    let origin1 = req.headers.origin;
-    if (!origin1 && req.headers.referer) {
-      const refererUrl = new URL(req.headers.referer);
-      origin1 = `${refererUrl.protocol}//${refererUrl.host}`;
-    }
-
-    console.log("origin from referer=",origin1);
 
     // Generate session ID
     const sessionId = generateSessionId();
@@ -150,68 +123,20 @@ app.get(
     });
 
     // Set session ID as an HTTP-only cookie
+
     res.cookie("sessionId", sessionId, {
-      domain: ".railway.app", // Explicitly set for Railway
+      domain: '.railway.app', // Explicitly set for Railway
       httpOnly: true, // Adjust if you need access in frontend JS
       secure: true, // Ensure secure only
       sameSite: "none", // Required for cross-origin cookies
     });
 
     console.log("session id inside google auth=", sessionId);
-    const origin = req.headers.origin;
-    console.log("origin in google oauth=",origin);
-    // Determine redirect URL based on request origin
-    const redirectUrl =
-      origin === "http://localhost:3000"
-        ? "http://localhost:3000/tasks"
-        : origin === "https://to-do-list-frontend-woex.onrender.com"
-        ? "https://to-do-list-frontend-woex.onrender.com/tasks"
-        : "https://alluring-radiance-production.up.railway.app/tasks";
 
     // Redirect to the tasks page without showing the token in the URL
-    res.redirect(redirectUrl);
+    res.redirect("https://alluring-radiance-production.up.railway.app/tasks");
   }
 );
-// app.get(
-//   "/auth/google/callback",
-//   passport.authenticate("google", {
-//     failureRedirect: "http://localhost:3000/login",
-//   }),
-//   async (req, res) => {
-//     if (!req.user) {
-//       return res.status(401).json({ message: "Authentication failed" });
-//     }
-
-//     // Generate session ID
-//     const sessionId = generateSessionId();
-
-//     // Capture user-agent and IP address
-//     const userAgent = req.get("User-Agent");
-//     const ipAddress = req.ip;
-
-//     // Save session with user ID, user-agent, and IP address
-//     await Session.create({
-//       sessionId,
-//       userId: req.user._id,
-//       userAgent,
-//       ipAddress,
-//     });
-
-//     // Set session ID as an HTTP-only cookie
-
-//     res.cookie("sessionId", sessionId, {
-//       domain: '.railway.app', // Explicitly set for Railway
-//       httpOnly: true, // Adjust if you need access in frontend JS
-//       secure: true, // Ensure secure only
-//       sameSite: "none", // Required for cross-origin cookies
-//     });
-
-//     console.log("session id inside google auth=", sessionId);
-
-//     // Redirect to the tasks page without showing the token in the URL
-//     res.redirect("http://localhost:3000/tasks");
-//   }
-// );
 
 app.get("/login/success", authenticateSession, async (req, res) => {
   res
@@ -229,7 +154,7 @@ app.get("/logout", async (req, res, next) => {
     if (err) {
       return next(err);
     }
-    res.redirect("http://localhost:3000/login");
+    res.redirect("https://alluring-radiance-production.up.railway.app/login");
   });
 });
 
