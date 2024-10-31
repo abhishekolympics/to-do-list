@@ -102,9 +102,20 @@ app.get(
 
 app.get(
   "/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "http://localhost:3000/login",
-  }),
+  (req, res, next) => {
+    // Determine failure redirect URL based on request origin
+    const origin = req.headers.origin;
+    const failureRedirectUrl = origin === 'http://localhost:3000'
+      ? 'http://localhost:3000/login'
+      : origin === 'https://to-do-list-frontend-woex.onrender.com'
+      ? 'https://to-do-list-frontend-woex.onrender.com/login'
+      : 'https://alluring-radiance-production.up.railway.app/login';
+
+    // Call passport.authenticate with the dynamic failure redirect
+    passport.authenticate("google", {
+      failureRedirect: failureRedirectUrl,
+    })(req, res, next);
+  },
   async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ message: "Authentication failed" });
@@ -126,7 +137,6 @@ app.get(
     });
 
     // Set session ID as an HTTP-only cookie
-
     res.cookie("sessionId", sessionId, {
       domain: '.railway.app', // Explicitly set for Railway
       httpOnly: true, // Adjust if you need access in frontend JS
@@ -136,10 +146,57 @@ app.get(
 
     console.log("session id inside google auth=", sessionId);
 
+    // Determine redirect URL based on request origin
+    const redirectUrl = origin === 'http://localhost:3000'
+      ? 'http://localhost:3000/tasks'
+      : origin === 'https://to-do-list-frontend-woex.onrender.com'
+      ? 'https://to-do-list-frontend-woex.onrender.com/tasks'
+      : 'https://alluring-radiance-production.up.railway.app/tasks';
+
     // Redirect to the tasks page without showing the token in the URL
-    res.redirect("http://localhost:3000/tasks");
+    res.redirect(redirectUrl);
   }
 );
+// app.get(
+//   "/auth/google/callback",
+//   passport.authenticate("google", {
+//     failureRedirect: "http://localhost:3000/login",
+//   }),
+//   async (req, res) => {
+//     if (!req.user) {
+//       return res.status(401).json({ message: "Authentication failed" });
+//     }
+
+//     // Generate session ID
+//     const sessionId = generateSessionId();
+
+//     // Capture user-agent and IP address
+//     const userAgent = req.get("User-Agent");
+//     const ipAddress = req.ip;
+
+//     // Save session with user ID, user-agent, and IP address
+//     await Session.create({
+//       sessionId,
+//       userId: req.user._id,
+//       userAgent,
+//       ipAddress,
+//     });
+
+//     // Set session ID as an HTTP-only cookie
+
+//     res.cookie("sessionId", sessionId, {
+//       domain: '.railway.app', // Explicitly set for Railway
+//       httpOnly: true, // Adjust if you need access in frontend JS
+//       secure: true, // Ensure secure only
+//       sameSite: "none", // Required for cross-origin cookies
+//     });
+
+//     console.log("session id inside google auth=", sessionId);
+
+//     // Redirect to the tasks page without showing the token in the URL
+//     res.redirect("http://localhost:3000/tasks");
+//   }
+// );
 
 app.get("/login/success", authenticateSession, async (req, res) => {
   res
