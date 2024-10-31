@@ -32,20 +32,20 @@ app.use(cookieParser());
 //Enable cross origin Resource Sharing
 
 // Setup session
-app.use(
-  session({
-    secret: "yourSecret",
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
-    cookie: {
-      domain: ".railway.app", // Explicitly set for Railway
-      httpOnly: true, // Adjust if you need access in frontend JS
-      secure: true, // Ensure secure only
-      sameSite: "none", // Required for cross-origin cookies
-    },
-  })
-);
+// app.use(
+//   session({
+//     secret: "yourSecret",
+//     resave: false,
+//     saveUninitialized: false,
+//     store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+//     cookie: {
+//       domain: ".railway.app", // Explicitly set for Railway
+//       httpOnly: true, // Adjust if you need access in frontend JS
+//       secure: true, // Ensure secure only
+//       sameSite: "none", // Required for cross-origin cookies
+//     },
+//   })
+// );
 
 // Setup Passport
 app.use(passport.initialize());
