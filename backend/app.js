@@ -21,7 +21,7 @@ const app = express();
 // app.use(cors());
 app.use(
   cors({
-    origin: "*",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -29,19 +29,6 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// app.use(function (req, res, next) {
-//   res.setHeader(
-//     "Access-Control-Allow-Methods",
-//     "POST, PUT, OPTIONS, DELETE, GET"
-//   );
-//   res.header("Access-Control-Allow-Origin", "*");
-//   res.header(
-//     "Access-Control-Allow-Headers",
-//     "Origin, X-Requested-With, Content-Type, Accept"
-//   );
-//   res.header("Access-Control-Allow-Credentials", true);
-//   next();
-// });
 
 //Enable cross origin Resource Sharing
 
@@ -54,9 +41,9 @@ app.use(
     store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
     cookie: {
       domain: ".railway.app", // Explicitly set for Railway
-      // httpOnly: true,        // Adjust if you need access in frontend JS
-      // secure: true,          // Ensure secure only
-      // sameSite: "none", // Required for cross-origin cookies
+      httpOnly: true,        // Adjust if you need access in frontend JS
+      secure: true,          // Ensure secure only
+      sameSite: "none", // Required for cross-origin cookies
     },
   })
 );
