@@ -145,7 +145,7 @@ app.get(
     });
 
     console.log("session id inside google auth=", sessionId);
-
+    const origin = req.headers.origin;
     // Determine redirect URL based on request origin
     const redirectUrl = origin === 'http://localhost:3000'
       ? 'http://localhost:3000/tasks'
