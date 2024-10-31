@@ -18,6 +18,9 @@ const authenticateSession = async (req, res, next) => {
 
     // Check if IP address matches
     const requestIp = req.ip || req.connection.remoteAddress;
+    console.log("session ip address=",session.ipAddress);
+    console.log("ip address recieved=",req.ip);
+    console.log("remote address=",req.connection.remoteAddress);
     if (session.ipAddress !== requestIp) {
       return res.status(403).json({ msg: "Session IP mismatch. Unauthorized access." });
     }
