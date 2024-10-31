@@ -39,7 +39,7 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
     cookie: {
-      domain: undefined, // Explicitly set for Railway
+      domain: '.railway.app', // Explicitly set for Railway
       httpOnly: true, // Adjust if you need access in frontend JS
       secure: true, // Ensure secure only
       sameSite: "none", // Required for cross-origin cookies
@@ -122,7 +122,7 @@ app.get(
     // Set session ID as an HTTP-only cookie
 
     res.cookie("sessionId", sessionId, {
-      domain: undefined, // Explicitly set for Railway
+      domain: '.railway.app', // Explicitly set for Railway
       httpOnly: true, // Adjust if you need access in frontend JS
       secure: true, // Ensure secure only
       sameSite: "none", // Required for cross-origin cookies

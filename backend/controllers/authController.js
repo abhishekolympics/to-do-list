@@ -44,7 +44,7 @@ const register = async (req, res) => {
     res.cookie("sessionId", sessionId, {
       httpOnly: true,
       // secure: process.env.NODE_ENV === "production",
-      domain: undefined,
+      domain: '.railway.app',
       maxAge: 3600 * 1000,
     });
 
@@ -88,7 +88,7 @@ const login = async (req, res) => {
     res.cookie("sessionId", sessionId, {
       httpOnly: true,
       // secure: process.env.NODE_ENV === "production",
-      domain: undefined,
+      domain: '.railway.app',
       maxAge: 3600 * 1000,
     });
 
