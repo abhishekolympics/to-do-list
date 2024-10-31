@@ -19,12 +19,19 @@ const TaskList = () => {
 
   const getUser = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/login/success", {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        "https://to-do-list-production-8145.up.railway.app/login/success",
+        {
+          withCredentials: true,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+          },
+        }
+      );
       setUserdata(response.data.user);
       console.log("user info=", userdata);
-      localStorage.setItem("token", response.data.token);
+      // localStorage.setItem("token", response.data.token);
     } catch (error) {
       console.log("error inside getUser=", error);
       toast.error("Failed to fetch user data");
@@ -33,13 +40,13 @@ const TaskList = () => {
 
   const fetchTasks = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/tasks", {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      // const token = localStorage.getItem("token");
+      const response = await axios.get(
+        "https://to-do-list-production-8145.up.railway.app/api/tasks",
+        {
           withCredentials: true,
-        },
-      });
+        }
+      );
       setTasks(response.data);
     } catch (error) {
       toast.error("Failed to fetch tasks");
@@ -47,23 +54,23 @@ const TaskList = () => {
   };
 
   const logout = () => {
-    window.open("http://localhost:5000/logout", "_self");
+    window.open(
+      "https://to-do-list-production-8145.up.railway.app/logout",
+      "_self"
+    );
   };
 
   const createTask = async (firstTaskTitle, firstTaskDescription) => {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/tasks",
+        "https://to-do-list-production-8145.up.railway.app/api/tasks",
         {
           title: firstTaskTitle,
           user: userdata._id,
           description: firstTaskDescription,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
           withCredentials: true,
         }
       );
@@ -82,12 +89,12 @@ const TaskList = () => {
 
   const editTask = async (taskId, newTitle, newDescription) => {
     // Implement the edit functionality
-    const token = localStorage.getItem("token");
-    console.log("token in editTask=", token);
+    // const token = localStorage.getItem("token");
+    // console.log("token in editTask=", token);
     console.log("selected task in edittask=", selectedTask);
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/tasks/${taskId}`,
+        `https://to-do-list-production-8145.up.railway.app/api/tasks/${taskId}`,
         {
           title: newTitle,
           description: newDescription ? newDescription : "",
@@ -95,9 +102,9 @@ const TaskList = () => {
           userId: userdata._id,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          // },
           withCredentials: true,
         }
       );
@@ -122,14 +129,14 @@ const TaskList = () => {
   };
 
   const deleteTask = async (taskId) => {
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/tasks/${taskId}`,
+        `https://to-do-list-production-8145.up.railway.app/api/tasks/${taskId}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          // },
           withCredentials: true,
         }
       );

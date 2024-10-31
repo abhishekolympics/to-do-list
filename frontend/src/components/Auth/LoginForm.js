@@ -42,20 +42,21 @@ function App() {
     console.log("formData=", loginFormData);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch("https://to-do-list-production-8145.up.railway.app/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(loginFormData),
+        credentials: 'include',
       });
       console.log("Response from backend's login =", response);
       if (response.ok) {
         const data = await response.json();
         toast.success("Login successful!");
         console.log("Insider onloginSubmit, response=", response);
-        console.log(data.token);
-        localStorage.setItem("token", data.token);
+        // console.log(data.token);
+        // localStorage.setItem("token", data.token);
       } else {
         console.error("Login error:", response.statusText);
       }
@@ -68,19 +69,20 @@ function App() {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
+      const response = await fetch("https://to-do-list-production-8145.up.railway.app/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(signupFormData),
+        credentials: "include",
       });
 
       if (response.ok) {
         const data = await response.json();
         toast.success("Registration successful!");
-        console.log(data.token);
-        localStorage.setItem("token", data.token);
+        // console.log(data.token);
+        // localStorage.setItem("token", data.token);
       } else {
         console.error("Registration error:", response.statusText);
       }
@@ -95,37 +97,13 @@ function App() {
   };
 
   // const handleGoogleSignUp =()=>{
-  //     window.open("http://localhost:5000/auth/google","_self");
+  //     window.open("https://to-do-list-production-8145.up.railway.app/auth/google","_self");
   // }
 
-  const handleGoogleSignUp = async () => {
-    try {
-      // Open a popup window for Google login
-      window.open("http://localhost:5000/auth/google", "_self");
-
-      const response = await fetch(
-        "http://localhost:5000/auth/google/callback",
-        {
-          method: "GET",
-          credentials: "include", // Include cookies for authentication
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("token", data.token); // Store token in local storage
-        toast.success("Login via Google successful!");
-
-        // Redirect to tasks page after storing the token
-        window.location.href = "/tasks";
-      } else {
-        console.error("Google login error:", response.statusText);
-        toast.error("Google login failed!");
-      }
-    } catch (error) {
-      console.error("Google login error:", error);
-    }
+  const handleGoogleSignUp = () => {
+    window.open("https://to-do-list-production-8145.up.railway.app/auth/google", "_self");
   };
+  
 
   return (
     <div className="mainContainer">

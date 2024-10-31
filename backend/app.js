@@ -18,25 +18,7 @@ connectDB();
 // Create Express app
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-app.use(cookieParser());
-
-app.use(function (req, res, next) {
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "POST, PUT, OPTIONS, DELETE, GET"
-  );
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  res.header("Access-Control-Allow-Credentials", true);
-  next();
-});
-
-//Enable cross origin Resource Sharing
+// app.use(cors());
 app.use(
   cors({
     origin: "*",
@@ -44,6 +26,24 @@ app.use(
     credentials: true,
   })
 );
+app.use(express.json());
+app.use(cookieParser());
+
+// app.use(function (req, res, next) {
+//   res.setHeader(
+//     "Access-Control-Allow-Methods",
+//     "POST, PUT, OPTIONS, DELETE, GET"
+//   );
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept"
+//   );
+//   res.header("Access-Control-Allow-Credentials", true);
+//   next();
+// });
+
+//Enable cross origin Resource Sharing
 
 // Setup session
 app.use(
