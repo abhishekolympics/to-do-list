@@ -55,7 +55,7 @@ app.use(
 
 // Setup Passport
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
 // Configure Passport to use Google OAuth 2.0
 passport.use(
