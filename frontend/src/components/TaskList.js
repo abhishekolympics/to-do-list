@@ -18,6 +18,7 @@ const TaskList = () => {
   const [selectedTask, setSelectedTask] = useState(null);
 
   const getUser = async () => {
+    console.log("cookies inside getUser=",document.cookie);
     const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
       const [name, value] = cookie.split("=");
       acc[name] = value;
@@ -30,15 +31,10 @@ const TaskList = () => {
         "https://to-do-list-production-8145.up.railway.app/login/success",
         {
           withCredentials: true,
-          // headers: {
-          //   "Access-Control-Allow-Origin": "*",
-          //   "Content-Type": "application/json",
-          // },
         }
       );
       setUserdata(response.data.user);
       console.log("user info=", userdata);
-      // localStorage.setItem("token", response.data.token);
     } catch (error) {
       console.log("error inside getUser=", error);
       toast.error("Failed to fetch user data");
