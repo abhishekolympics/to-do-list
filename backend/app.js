@@ -126,6 +126,14 @@ app.get(
       return res.status(401).json({ message: "Authentication failed" });
     }
 
+    let origin1 = req.headers.origin;
+    if (!origin1 && req.headers.referer) {
+      const refererUrl = new URL(req.headers.referer);
+      origin1 = `${refererUrl.protocol}//${refererUrl.host}`;
+    }
+
+    console.log("origin from referer=",origin1);
+
     // Generate session ID
     const sessionId = generateSessionId();
 
