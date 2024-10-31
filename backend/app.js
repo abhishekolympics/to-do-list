@@ -42,7 +42,7 @@ app.use(
   session({
     secret: "yourSecret",
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
     cookie: {
       domain: '.railway.app', // Explicitly set for Railway
@@ -199,6 +199,7 @@ app.get(
 // );
 
 app.get("/login/success", authenticateSession, async (req, res) => {
+
   res
     .status(200)
     .json({ message: "User logged in successfully", user: req.user });
