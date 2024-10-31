@@ -107,6 +107,7 @@ app.get(
   "/auth/google/callback",
   (req, res, next) => {
     // Determine failure redirect URL based on request origin
+    console.log("request headers inside google oauth=",req.headers);
     const origin = req.headers.origin;
     const failureRedirectUrl =
       origin === "http://localhost:3000"
