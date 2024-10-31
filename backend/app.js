@@ -18,10 +18,16 @@ connectDB();
 // Create Express app
 const app = express();
 
+const origins = [
+  'http://localhost:3000',
+  'https://to-do-list-frontend-woex.onrender.com/',
+  'https://alluring-radiance-production.up.railway.app/',
+];
+
 // app.use(cors());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: origins,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
