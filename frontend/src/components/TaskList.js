@@ -18,15 +18,22 @@ const TaskList = () => {
   const [selectedTask, setSelectedTask] = useState(null);
 
   const getUser = async () => {
+    const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+      const [name, value] = cookie.split("=");
+      acc[name] = value;
+      return acc;
+    }, {});
+
+    console.log(cookies);
     try {
       const response = await axios.get(
         "https://to-do-list-production-8145.up.railway.app/login/success",
         {
           withCredentials: true,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Content-Type": "application/json",
-          },
+          // headers: {
+          //   "Access-Control-Allow-Origin": "*",
+          //   "Content-Type": "application/json",
+          // },
         }
       );
       setUserdata(response.data.user);
