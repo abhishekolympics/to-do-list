@@ -45,7 +45,7 @@ const deleteTask = async (req, res) => {
     // Ensure the user owns the task before deletion
     console.log("task.user.toString()=", task.user.toString());
     console.log("req.user=", req.user);
-    if (task.user.toString() !== req.user) {
+    if (task.user.toString() !== req.user._id) {
       return res.status(401).json({ msg: "Not authorized" });
     }
     await Task.findByIdAndDelete(id);
