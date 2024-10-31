@@ -150,6 +150,7 @@ app.get(
 
     console.log("session id inside google auth=", sessionId);
     const origin = req.headers.origin;
+    console.log("origin in google oauth=",origin);
     // Determine redirect URL based on request origin
     const redirectUrl =
       origin === "http://localhost:3000"
