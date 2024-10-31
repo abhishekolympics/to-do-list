@@ -1,8 +1,9 @@
 const Session = require("../models/Session");
-const ip = require('ip');
+const IpAddress = require("../models/IpAddress");
+const ip = require("ip");
 
 // Function to check if two IPs are in the same subnet
-const isSameSubnet = (ip1, ip2, subnetMask = '255.255.255.0') => {
+const isSameSubnet = (ip1, ip2, subnetMask = "255.255.255.0") => {
   // Convert IPs to their binary format
   const ip1Binary = ip.fromLong(ip.toLong(ip1) & ip.toLong(subnetMask));
   const ip2Binary = ip.fromLong(ip.toLong(ip2) & ip.toLong(subnetMask));
@@ -16,40 +17,62 @@ const authenticateSession = async (req, res, next) => {
   try {
     const sessionId = req.cookies.sessionId;
     if (!sessionId) {
-      return res.status(401).json({ msg: "No session ID found. Please log in." });
+      return res
+        .status(401)
+        .json({ msg: "No session ID found. Please log in." });
     }
 
     // Find the session in the database
-    const session = await Session.findOne({ sessionId }).populate("userId", "username email");
+    const session = await Session.findOne({ sessionId }).populate(
+      "userId",
+      "username email"
+    );
     if (!session) {
       return res.status(401).json({ msg: "Invalid session. Please log in." });
     }
 
     const requestIp = req.ip || req.connection.remoteAddress; // Current request IP
-    const recordedIps = session.ipAddresses || []; // Array of recorded IP addresses
 
-    // Check if the request IP is in the recorded IP addresses
-    const ipMatched = recordedIps.includes(requestIp);
+    // Check if the current IP is already recorded for the user
+    const ipAddressEntry = await IpAddress.findOne({
+      userId: session.userId._id,
+      ipAddresses: requestIp,
+    });
 
-    // Check if recorded IP is the same or in the same subnet
+    if (!ipAddressEntry) {
+      // If the IP address is not found, store it
+      await IpAddress.updateOne(
+        { userId: session.userId._id },
+        { $addToSet: { ipAddresses: requestIp } },
+        { upsert: true } // Create a new document if it doesn't exist
+      );
+    }
+
+    // Check if the recorded IP is the same or in the same subnet
     const recordedIp = session.ipAddress; // Previously recorded IP address
     const ipInRange = isSameSubnet(recordedIp, requestIp);
 
     // Allow access if either the current IP matches or it is in the same subnet
-    if (!ipMatched && !ipInRange) {
-      return res.status(403).json({ msg: "Session IP mismatch. Unauthorized access." });
+    if (!ipAddressEntry && !ipInRange) {
+      return res
+        .status(403)
+        .json({ msg: "Session IP mismatch. Unauthorized access." });
     }
 
     // Optionally, check if user agent matches
     if (session.userAgent !== req.headers["user-agent"]) {
-      return res.status(403).json({ msg: "Session User Agent mismatch. Unauthorized access." });
+      return res
+        .status(403)
+        .json({ msg: "Session User Agent mismatch. Unauthorized access." });
     }
 
     // Attach user data to request for further processing
     req.user = session.userId;
 
     // Log the session information for monitoring
-    console.log(`Session authenticated for user: ${req.user.username}, IP: ${requestIp}`);
+    console.log(
+      `Session authenticated for user: ${req.user.username}, IP: ${requestIp}`
+    );
 
     next();
   } catch (error) {
