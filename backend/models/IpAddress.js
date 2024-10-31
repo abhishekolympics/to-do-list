@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
 const ipAddressSchema = new mongoose.Schema({
-  sessionId: {
-    type: String,
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
-    unique: true, // Ensure each sessionId can only have one associated IP
   },
   ipAddresses: [{
     type: String,
@@ -16,6 +16,4 @@ const ipAddressSchema = new mongoose.Schema({
   },
 });
 
- const IpAddress = new mongoose.model("IpAddress", ipAddressSchema);
-
- module.exports = IpAddress;
+module.exports = mongoose.model("IpAddress", ipAddressSchema);
