@@ -21,8 +21,7 @@
     "nodemon": "^3.1.0"
   },
   "scripts": {
-    "start": "pm2 start app.js --name my-app",
-    "build": "npm run build-assets", 
+    "start": "node app.js",
     "dev": "nodemon app.js"
   }
   
