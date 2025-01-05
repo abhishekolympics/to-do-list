@@ -39,7 +39,6 @@ function App() {
 
   const onLoginSubmit = async (e) => {
     e.preventDefault();
-    console.log("formData=", loginFormData);
 
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
@@ -50,13 +49,9 @@ function App() {
         body: JSON.stringify(loginFormData),
         credentials: 'include',
       });
-      console.log("Response from backend's login =", response);
       if (response.ok) {
         const data = await response.json();
         toast.success("Login successful!");
-        console.log("Insider onloginSubmit, response=", response);
-        // console.log(data.token);
-        // localStorage.setItem("token", data.token);
       } else {
         console.error("Login error:", response.statusText);
       }
@@ -81,8 +76,6 @@ function App() {
       if (response.ok) {
         const data = await response.json();
         toast.success("Registration successful!");
-        // console.log(data.token);
-        // localStorage.setItem("token", data.token);
       } else {
         console.error("Registration error:", response.statusText);
       }
@@ -96,15 +89,10 @@ function App() {
     window.history.pushState({}, null, "/login");
   };
 
-  // const handleGoogleSignUp =()=>{
-  //     window.open("https://to-do-list-production-8145.up.railway.app/auth/google","_self");
-  // }
-
   const handleGoogleSignUp = () => {
     window.open(`${process.env.REACT_APP_BACKEND_URL}/auth/google`, "_self");
   };
   
-
   return (
     <div className="mainContainer">
       <div

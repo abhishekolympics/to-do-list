@@ -11,21 +11,18 @@ import AddTaskModal from "./AddTaskModal";
 const TaskList = () => {
   const [userdata, setUserdata] = useState({});
   const [tasks, setTasks] = useState([]);
-  const [showPopup, setShowPopup] = useState(false); // State to toggle popup visibility
-  const [newTaskTitle, setNewTaskTitle] = useState(""); // State for new task title
-  const [newTaskDescription, setNewTaskDescription] = useState(""); // State for new task title
+  const [showPopup, setShowPopup] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
   const getUser = async () => {
-    console.log("cookies inside getUser=",document.cookie);
     const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
       const [name, value] = cookie.split("=");
       acc[name] = value;
       return acc;
     }, {});
-
-    console.log(cookies);
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/login/success`,
@@ -34,16 +31,13 @@ const TaskList = () => {
         }
       );
       setUserdata(response.data.user);
-      console.log("user info=", userdata);
     } catch (error) {
-      console.log("error inside getUser=", error);
       toast.error("Failed to fetch user data");
     }
   };
 
   const fetchTasks = async () => {
     try {
-      // const token = localStorage.getItem("token");
       const response = await axios.get(
         `${process.env.REACT_APP_BACKEND_URL}/api/tasks`,
         {
@@ -64,7 +58,6 @@ const TaskList = () => {
   };
 
   const createTask = async (firstTaskTitle, firstTaskDescription) => {
-    // const token = localStorage.getItem("token");
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/api/tasks`,
@@ -80,21 +73,16 @@ const TaskList = () => {
       if (response.status === 201) {
         toast.success("New task created successfully.");
         fetchTasks();
-        setShowPopup(false); // Close the popup after creating the task
-        setNewTaskTitle(""); // Reset the title field
-        setNewTaskDescription(""); // Reset the description field
+        setShowPopup(false);
+        setNewTaskTitle("");
+        setNewTaskDescription("");
       }
     } catch (error) {
-      console.log("error creating task=", error);
       toast.error("Failed to create new task.");
     }
   };
 
   const editTask = async (taskId, newTitle, newDescription) => {
-    // Implement the edit functionality
-    // const token = localStorage.getItem("token");
-    // console.log("token in editTask=", token);
-    console.log("selected task in edittask=", selectedTask);
     try {
       const response = await axios.put(
         `${process.env.REACT_APP_BACKEND_URL}/api/tasks/${taskId}`,
@@ -105,16 +93,13 @@ const TaskList = () => {
           userId: userdata._id,
         },
         {
-          // headers: {
-          //   Authorization: `Bearer ${token}`,
-          // },
           withCredentials: true,
         }
       );
 
       if (response.status === 200) {
         toast.success("Task updated successfully.");
-        await fetchTasks(); // Refresh the task list
+        await fetchTasks();
       }
     } catch (error) {
       toast.error("Failed to update task.");
@@ -132,14 +117,10 @@ const TaskList = () => {
   };
 
   const deleteTask = async (taskId) => {
-    // const token = localStorage.getItem("token");
     try {
       const response = await axios.delete(
         `${process.env.REACT_APP_BACKEND_URL}/api/tasks/${taskId}`,
         {
-          // headers: {
-          //   Authorization: `Bearer ${token}`,
-          // },
           withCredentials: true,
         }
       );
@@ -192,7 +173,7 @@ const TaskList = () => {
           />
         )}
         {isEditModalOpen &&
-          selectedTask && ( // Render modal only if open and a task is selected
+          selectedTask && (
             <EditTaskModal
               isOpen={isEditModalOpen}
               onClose={closeEditModal}
