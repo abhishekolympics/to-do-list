@@ -11,13 +11,10 @@ const authenticateSession = require("./middleware/authenticateSession");
 const generateSessionId = require("./utils/sessionUtils");
 const cookieParser = require("cookie-parser");
 
-// Connect to MongoDB
 connectDB();
 
-// Create Express app
 const app = express();
 
-// CORS configuration
 app.use(
   cors({
     origin: process.env.FRONTEND_URI,
@@ -29,7 +26,6 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// Session configuration based on environment
 const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
@@ -47,14 +43,11 @@ const sessionConfig = {
       }
 };
 
-// Add session middleware
 app.use(session(sessionConfig));
 
-// Setup Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Cookie configuration function
 const getCookieConfig = () => {
   if (process.env.NODE_ENV === 'production') {
     return {
@@ -74,7 +67,6 @@ const getCookieConfig = () => {
   }
 };
 
-// Configure Passport
 passport.use(
   new OAuth2Strategy(
     {
@@ -133,27 +125,14 @@ app.get(
     const sessionId = generateSessionId();
     const userAgent = req.get("User-Agent");
     const ipAddress = req.ip;
-
-    // Create session in database
-    const session = await Session.create({
+    await Session.create({
       sessionId,
       userId: req.user._id,
       userAgent,
       ipAddress,
     });
-
-    console.log("Created session:", session);
-
-    // Get cookie config
     const cookieConfig = getCookieConfig();
-    console.log("Using cookie config:", cookieConfig);
-
-    // Set cookie
     res.cookie("sessionId", sessionId, cookieConfig);
-    
-    // Log the Set-Cookie header
-    console.log("Set-Cookie header:", res.getHeader('Set-Cookie'));
-
     res.redirect(`${process.env.FRONTEND_URI}/tasks`);
   }
 );
@@ -164,25 +143,19 @@ app.get("/login/success", authenticateSession, async (req, res) => {
 
 app.get("/logout", async (req, res) => {
   const sessionId = req.cookies.sessionId;
-  console.log("Logout - session ID:", sessionId);
-
   if (sessionId) {
     const deletedSession = await Session.findOneAndDelete({ sessionId });
-    console.log("Deleted session:", deletedSession);
   }
 
-  // Clear both session types
   req.logout(() => {
     res.clearCookie('sessionId', getCookieConfig());
     res.redirect(`${process.env.FRONTEND_URI}/login`);
   });
 });
 
-// Define routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/tasks", require("./routes/taskRoutes"));
 
-// Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
