@@ -5,6 +5,7 @@ const ipAddressSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+    index: true
   },
   ipAddresses: [{
     type: String,
@@ -16,4 +17,5 @@ const ipAddressSchema = new mongoose.Schema({
   },
 });
 
+ipAddressSchema.index({ userId: 1, createdAt: -1 });
 module.exports = mongoose.model("IpAddress", ipAddressSchema);

@@ -5,11 +5,13 @@ const sessionSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    index: true
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+    index: true
   },
   userAgent: {
     type: String,
@@ -26,4 +28,5 @@ const sessionSchema = new mongoose.Schema({
   },
 });
 
+sessionSchema.index({ userId: 1, sessionId: 1 });
 module.exports = mongoose.model("Session", sessionSchema);

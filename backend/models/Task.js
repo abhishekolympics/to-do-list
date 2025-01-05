@@ -15,7 +15,8 @@ const taskSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true
   },
   createdAt: {
     type: Date,
@@ -23,6 +24,8 @@ const taskSchema = new mongoose.Schema({
   }
 });
 
+taskSchema.index({ user: 1, completed: 1 });  // For queries that filter by both user and completion status
+taskSchema.index({ user: 1, createdAt: -1 });
 const Task = mongoose.model('Task', taskSchema);
 
 module.exports = Task;

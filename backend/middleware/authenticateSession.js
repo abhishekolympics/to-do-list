@@ -9,6 +9,8 @@ const isSameSubnet = (ip1, ip2, subnetMask = "255.255.255.0") => {
   return ip1Binary === ip2Binary;
 };
 
+const cache = new Map();
+
 const authenticateSession = async (req, res, next) => {
   try {
     const sessionId = req.cookies.sessionId;
@@ -17,7 +19,14 @@ const authenticateSession = async (req, res, next) => {
         .status(401)
         .json({ msg: "No session ID found. Please log in." });
     }
-    const session = await Session.findOne({ sessionId }).populate(
+
+    if (cache.has(sessionId)) {
+      req.user = cache.get(sessionId);
+      return next();
+    }
+
+
+    const session = await Session.findOne({ sessionId }).hint({ sessionId: 1}).populate(
       "userId",
       "username email"
     );
@@ -25,6 +34,10 @@ const authenticateSession = async (req, res, next) => {
       return res.status(401).json({ msg: "Invalid session. Please log in." });
     }
 
+    if (session) {
+      cache.set(sessionId, session.userId);
+    }
+    
     const requestIp = req.ip || req.connection.remoteAddress;
 
     const ipAddressEntry = await IpAddress.findOne({
