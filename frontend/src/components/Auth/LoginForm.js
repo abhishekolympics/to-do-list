@@ -42,7 +42,7 @@ function App() {
     console.log("formData=", loginFormData);
 
     try {
-      const response = await fetch("https://to-do-list-production-8145.up.railway.app/api/auth/login", {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +69,7 @@ function App() {
     e.preventDefault();
 
     try {
-      const response = await fetch("https://to-do-list-production-8145.up.railway.app/api/auth/register", {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -101,7 +101,7 @@ function App() {
   // }
 
   const handleGoogleSignUp = () => {
-    window.open("https://to-do-list-production-8145.up.railway.app/auth/google", "_self");
+    window.open(`${process.env.REACT_APP_BACKEND_URL}/auth/google`, "_self");
   };
   
 

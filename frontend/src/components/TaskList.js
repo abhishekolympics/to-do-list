@@ -28,7 +28,7 @@ const TaskList = () => {
     console.log(cookies);
     try {
       const response = await axios.get(
-        "https://to-do-list-production-8145.up.railway.app/login/success",
+        `${process.env.REACT_APP_BACKEND_URL}/login/success`,
         {
           withCredentials: true,
         }
@@ -45,7 +45,7 @@ const TaskList = () => {
     try {
       // const token = localStorage.getItem("token");
       const response = await axios.get(
-        "https://to-do-list-production-8145.up.railway.app/api/tasks",
+        `${process.env.REACT_APP_BACKEND_URL}/api/tasks`,
         {
           withCredentials: true,
         }
@@ -58,7 +58,7 @@ const TaskList = () => {
 
   const logout = () => {
     window.open(
-      "https://to-do-list-production-8145.up.railway.app/logout",
+      `${process.env.REACT_APP_BACKEND_URL}/logout`,
       "_self"
     );
   };
@@ -67,7 +67,7 @@ const TaskList = () => {
     // const token = localStorage.getItem("token");
     try {
       const response = await axios.post(
-        "https://to-do-list-production-8145.up.railway.app/api/tasks",
+        `${process.env.REACT_APP_BACKEND_URL}/api/tasks`,
         {
           title: firstTaskTitle,
           user: userdata._id,
@@ -97,7 +97,7 @@ const TaskList = () => {
     console.log("selected task in edittask=", selectedTask);
     try {
       const response = await axios.put(
-        `https://to-do-list-production-8145.up.railway.app/api/tasks/${taskId}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/tasks/${taskId}`,
         {
           title: newTitle,
           description: newDescription ? newDescription : "",
@@ -135,7 +135,7 @@ const TaskList = () => {
     // const token = localStorage.getItem("token");
     try {
       const response = await axios.delete(
-        `https://to-do-list-production-8145.up.railway.app/api/tasks/${taskId}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/tasks/${taskId}`,
         {
           // headers: {
           //   Authorization: `Bearer ${token}`,
