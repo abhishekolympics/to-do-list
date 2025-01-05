@@ -55,25 +55,39 @@ const register = async (req, res) => {
   }
 };
 
-// Login user
+const getCookieConfig = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return {
+      domain: '.railway.app',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 24 * 60 * 60 * 1000
+    };
+  } else {
+    return {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000
+    };
+  }
+};
+
 const login = async (req, res) => {
   try {
-    // Extract user details from request body
     const { email, password } = req.body;
 
-    // Check if user exists
     let user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
-    // Check if password is correct
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
-    // Generate session ID
     const sessionId = generateSessionId();
     const userAgent = req.headers["user-agent"];
     const ipAddress = req.ip || req.connection.remoteAddress;
@@ -85,12 +99,7 @@ const login = async (req, res) => {
       ipAddress,
     });
 
-    res.cookie("sessionId", sessionId, {
-      httpOnly: true,
-      // secure: process.env.NODE_ENV === "production",
-      domain: '.railway.app',
-      maxAge: 3600 * 1000,
-    });
+    res.cookie("sessionId", sessionId, getCookieConfig());
 
     res.status(200).json({ msg: "User logged in successfully" });
   } catch (error) {
